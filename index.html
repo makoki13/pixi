@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="ISO-8859-1">
+		<title>Insert title here</title>
+		<style>
+			* {padding: 0; margin: 0}
+		</style>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.6.0/pixi.min.js"></script>
+	</head>
+	<body style="background-color:white;">
+		<script>
+			/*
+    		var type = "WebGL"
+    		if(!PIXI.utils.isWebGLSupported()){
+      			type = "canvas"
+    		}
+			*/
+    		//Create the renderer
+    		//var renderer = PIXI.autoDetectRenderer(256, 256);
+			var //Aliases 
+			Container = PIXI.Container,
+		    autoDetectRenderer = PIXI.autoDetectRenderer,
+		    loader = PIXI.loader,
+		    resources = PIXI.loader.resources,
+		    Sprite = PIXI.Sprite;
+			
+			var sprite;
+
+			renderer = autoDetectRenderer(
+					500, 500,
+					{antialias: true, transparent: false, resolution: 1}
+					);
+
+    		//Add the canvas to the HTML document
+    		document.body.appendChild(renderer.view);
+
+    		//Create a container object called the `stage`
+    		var stage = new Container();
+
+    		//Tell the `renderer` to `render` the `stage`
+    		/*
+    		renderer.render(stage);
+    		renderer.view.style.position = "absolute";
+    		renderer.view.style.display = "block";
+    		renderer.autoResize = true;
+    		renderer.resize(window.innerWidth, window.innerHeight);
+    		*/
+    		
+    		loader
+    		  .add("logo","imagenes/circoSafor.jpg")
+    		  .on("progress",loadProgressHandler)
+    		  .load(setup);
+    		
+    		function keyboard(keyCode) {    			
+    			var key = {};
+    			key.code = keyCode;
+    			key.isDown = false;
+    			key.isUp = true;
+    			key.press = undefined;
+    			key.release = undefined;
+    			//The `downHandler`
+    			key.downHandler = function(event) {    				
+    				if (event.keyCode === key.code) {
+    			    	if (key.isUp && key.press) key.press();
+    			      	key.isDown = true;
+    			      	key.isUp = false;
+    			    }
+    				event.preventDefault();
+    			};
+
+    			//The `upHandler`
+    			key.upHandler = function(event) {
+    				if (event.keyCode === key.code) {
+    			    	if (key.isDown && key.release) key.release();
+    			      	key.isDown = false;
+    			      	key.isUp = true;
+    			    }
+    			    event.preventDefault();
+    			};
+
+    			//Attach event listeners
+    			window.addEventListener(
+    				"keydown", key.downHandler.bind(key), false
+    			);
+    			window.addEventListener(
+    				"keyup", key.upHandler.bind(key), false
+    			);
+    			return key;
+    		}
+    		
+    		function loadProgressHandler(loader, resource) {
+    			console.log("loading "+resource.url);
+    			console.log("progress: " + loader.progress + "%"); 
+    		}
+
+    		function setup() {
+    			sprite = new Sprite(
+    		    	//resources["imagenes/dulcesol.png"].texture
+    				resources.logo.texture
+    		  	);
+    			//sprite.x = 100; sprite.y = 100;	
+    			sprite.vx = sprite.vy = 0;
+    			sprite.position.set(0, 0);
+    			sprite.width = 2304;
+    			sprite.height = 1280;
+    			
+    			//sprite.scale.x = 2; sprite.scale.y = 2;    			
+    			//sprite.scale.set(0.5, 0.5);
+    			    			
+    			//sprite.anchor.x = 0.5;sprite.anchor.y = 0.5;
+    			//sprite.anchor.set(0.5, 0.5)
+    			//sprite.rotation = 0.5;
+    			
+    			//sprite.pivot.set(32, 32)
+    			
+    			stage.addChild(sprite);
+      			renderer.render(stage);
+      			
+      			var left = keyboard(37),
+      	      		up = keyboard(38),
+      	      		right = keyboard(39),
+      	      		down = keyboard(40);
+      			
+      			right.press = function() {sprite.vx = -1;};
+      			right.release = function() {if (!right.isDown && sprite.vy === 0) {sprite.vx = 0;}};
+      			down.press = function() {sprite.vy = -1;};
+      			down.release = function() {if (!down.isDown && sprite.vx === 0) {sprite.vy = 0;}};
+      			left.press = function() {sprite.vx = 1;};
+      			left.release = function() {if (!left.isDown && sprite.vy === 0) {sprite.vx = 0;}};
+      			up.press = function() {sprite.vy = 1;};
+      			up.release = function() {if (!up.isDown && sprite.vx === 0) {sprite.vy = 0;}};
+      			
+      			state = play;
+      			
+      			gameLoop();
+    		}    	
+    		
+    		function gameLoop() {
+    			requestAnimationFrame(gameLoop);  
+    			state();
+    			renderer.render(stage);
+    		}
+    		
+    		function play() {
+    			if ((sprite.x===0) & (sprite.vx > 0)) sprite.vx = 0; 
+    			if ((sprite.x===(500-2304)) & (sprite.vx < 0)) sprite.vx = 0;
+    			sprite.x += sprite.vx;
+    			if ((sprite.y===0) & (sprite.vy > 0)) sprite.vy = 0;
+    			if ((sprite.y===(500-1280)) & (sprite.vy < 0)) sprite.vy = 0;
+    			sprite.y += sprite.vy
+    			//console.log("X: "+sprite.x+" ::: Y: "+sprite.y);
+    		}
+		</script>
+	</body>
+</html>
